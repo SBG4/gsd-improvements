@@ -1,0 +1,28 @@
+{
+  "version": "2.0.0",
+  "description": "GSD Hook Configuration",
+  "hooks": [
+    {
+      "name": "gsd-blackboard-sync",
+      "file": "gsd-blackboard-sync.js",
+      "trigger": "PostToolUse",
+      "tools": ["Write", "Edit", "Bash"],
+      "enabled": true,
+      "description": "Syncs file changes and commits to GSD blackboard"
+    },
+    {
+      "name": "gsd-session-save",
+      "file": "gsd-session-save.js",
+      "trigger": "PreToolUse",
+      "tools": ["Skill"],
+      "enabled": true,
+      "description": "Auto-saves session state for work continuity"
+    }
+  ],
+  "settings": {
+    "auto_save_interval_ms": 600000,
+    "max_events": 1000,
+    "enable_permissions_check": true,
+    "cross_platform_paths": true
+  }
+}
