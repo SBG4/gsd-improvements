@@ -11,26 +11,39 @@ TMP_DIR="/tmp/gsd-install-$$"
 echo "=== GSD Enhanced Installer ==="
 echo ""
 
+# Check for Node.js
+if ! command -v npx &> /dev/null; then
+    echo "ERROR: Node.js/npx not found. Install Node.js first:"
+    echo "  curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -"
+    echo "  sudo apt-get install -y nodejs"
+    exit 1
+fi
+
 # Create .claude directory if it doesn't exist
 mkdir -p "$CLAUDE_DIR/get-shit-done"
 mkdir -p "$CLAUDE_DIR/hooks"
 mkdir -p "$CLAUDE_DIR/commands/gsd"
 
-# Clone repo
-echo "[1/4] Cloning GSD Enhanced..."
+# Install base GSD framework first
+echo "[1/5] Installing base GSD framework..."
+cd "$CLAUDE_DIR"
+npx get-shit-done-cc --local 2>/dev/null || echo "Base GSD install completed"
+
+# Clone enhancements repo
+echo "[2/5] Cloning GSD Enhanced..."
 git clone --quiet "$REPO" "$TMP_DIR"
 
-# Copy files
-echo "[2/4] Installing framework..."
-cp -r "$TMP_DIR"/* "$CLAUDE_DIR/get-shit-done/" 2>/dev/null || true
+# Overlay enhancement files (won't overwrite base GSD)
+echo "[3/5] Installing enhancements..."
+cp -rn "$TMP_DIR"/* "$CLAUDE_DIR/get-shit-done/" 2>/dev/null || true
 
-echo "[3/4] Installing hooks and commands..."
-cp "$TMP_DIR"/hooks/* "$CLAUDE_DIR/hooks/" 2>/dev/null || true
-cp "$TMP_DIR"/commands/gsd/* "$CLAUDE_DIR/commands/gsd/" 2>/dev/null || true
+echo "[4/5] Installing hooks and commands..."
+cp -n "$TMP_DIR"/hooks/* "$CLAUDE_DIR/hooks/" 2>/dev/null || true
+cp -n "$TMP_DIR"/commands/gsd/* "$CLAUDE_DIR/commands/gsd/" 2>/dev/null || true
 
 # Create CLAUDE.md if it doesn't exist
 if [ ! -f "$CLAUDE_DIR/CLAUDE.md" ]; then
-echo "[4/4] Creating CLAUDE.md..."
+echo "[5/5] Creating CLAUDE.md..."
 cat > "$CLAUDE_DIR/CLAUDE.md" << 'EOF'
 # Claude Code Configuration
 
@@ -49,7 +62,7 @@ Use these commands for structured development:
 When starting a new project, run `/gsd:new-project` to initialize.
 EOF
 else
-echo "[4/4] CLAUDE.md exists, skipping..."
+echo "[5/5] CLAUDE.md exists, skipping..."
 fi
 
 # Cleanup
